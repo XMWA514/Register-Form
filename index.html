@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LIFF Form</title>
+    <script src="https://static.line-scdn.net/liff/2.1/sdk.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            margin-top: 20px;
+        }
+        .question {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .question label {
+            margin-right: 10px;
+        }
+        .question select, .question input {
+            padding: 8px;
+            font-size: 14px;
+        }
+        .question input {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>กรอกข้อมูลบริษัท</h2>
+    <div class="form-container" id="questionContainer">
+        <!-- คำถามเริ่มต้น -->
+        <div class="question">
+            <select id="companyType">
+                <option value="บจก.">บจก.</option>
+                <option value="หจก.">หจก.</option>
+            </select>
+            <input type="text" id="companyName" placeholder="กรุณากรอกชื่อบริษัท" required>
+        </div>
+    </div>
+
+    <button onclick="addQuestion()">เพิ่มคำถาม</button>
+    <button onclick="submitForm()">ลงทะเบียน</button>
+
+    <script>
+        window.onload = function() {
+            liff.init({ liffId: "YOUR_LIFF_ID" }).then(() => {
+                console.log("LIFF Initialized!");
+
+                // ดึงข้อมูล Line ID และ Line Display Name ของผู้ใช้
+                liff.getProfile().then(profile => {
+                    window.lineId = profile.userId;  // เก็บ Line ID
+                    window.displayName = profile.displayName;  // เก็บ Display Name
+                }).catch(err => {
+                    console.log("Error getting profile: ", err);
+                });
+            }).catch(err => {
+                console.log("LIFF Initialization failed: ", err);
+            });
+        };
+
+        // ฟังก์ชั่นเพิ่มคำถามใหม่
+        function addQuestion() {
+            const container = document.getElementById("questionContainer");
+
+            const questionDiv = document.createElement("div");
+            questionDiv.classList.add("question");
+
+            const dropdown = document.createElement("select");
+            dropdown.innerHTML = `
+                <option value="บจก.">บจก.</option>
+                <option value="หจก.">หจก.</option>
+            `;
+
+            const textbox = document.createElement("input");
+            textbox.type = "text";
+            textbox.placeholder = "กรุณากรอกข้อมูล";
+
+            questionDiv.appendChild(dropdown);
+            questionDiv.appendChild(textbox);
+            container.appendChild(questionDiv);
+        }
+
+        // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
+        function submitForm() {
+            const questions = document.querySelectorAll(".question");
+            let formData = [];
+
+            questions.forEach(q => {
+                const dropdownValue = q.querySelector("select").value;
+                const textValue = q.querySelector("input").value;
+                formData.push({ dropdown: dropdownValue, text: textValue });
+            });
+
+            formData.unshift({
+                dropdown: document.getElementById("companyType").value,
+                text: document.getElementById("companyName").value
+            });
+
+            if (formData.length > 0 && window.lineId) {
+                const payload = {
+                    data: formData,
+                    lineId: window.lineId,
+                    displayName: window.displayName
+                };
+
+                const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
+
+                fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert("ส่งข้อมูลสำเร็จ!");
+                })
+                .catch(error => {
+                    alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
+                });
+            } else {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            }
+        }
+    </script>
+</body>
+</html>
