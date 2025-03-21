@@ -68,43 +68,41 @@
         };
 
         // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
-        function submitForm() {
-            const companyType = document.getElementById("companyType").value;
-            const companyName = document.getElementById("companyName").value;
+        // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
+function submitForm() {
+    const companyType = document.getElementById("companyType").value;
+    const companyName = document.getElementById("companyName").value;
 
-            // ตรวจสอบค่าที่ได้มาจากฟอร์ม
-            console.log("companyType: ", companyType); // ตรวจสอบค่า dropdown
-            console.log("companyName: ", companyName); // ตรวจสอบค่า textbox
+    // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
+    if (!companyType || !companyName) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        return;  // หยุดการส่งข้อมูลหากมีข้อมูลไม่ครบ
+    }
 
-            // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
-            if (!companyType || !companyName) {
-                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-                return;  // หยุดการส่งข้อมูลหากมีข้อมูลไม่ครบ
-            }
+    // สร้างข้อมูลที่ต้องการส่ง
+    const formData = [{
+        dropdown: companyType,
+        text: companyName
+    }];
 
-            const formData = [{
-                dropdown: companyType,
-                text: companyName
-            }];
+    // ส่งข้อมูลในรูปแบบ JSON
+    const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
 
-            // ส่งข้อมูล
-            const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
-
-            fetch(scriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ data: formData })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert("ส่งข้อมูลสำเร็จ!");
-            })
-            .catch(error => {
-                alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
-            });
-        }
+    fetch(scriptUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'  // กำหนดประเภทข้อมูลที่ส่งเป็น JSON
+        },
+        body: JSON.stringify({ data: formData })  // ใช้ JSON.stringify เพื่อแปลงเป็น JSON
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("ส่งข้อมูลสำเร็จ!");
+    })
+    .catch(error => {
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
+    });
+}
     </script>
 </body>
 </html>
