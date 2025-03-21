@@ -83,10 +83,14 @@
             container.appendChild(questionDiv);
         }
 
-        // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
+  // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
 function submitForm() {
     const companyType = document.getElementById("companyType").value;
     const companyName = document.getElementById("companyName").value;
+
+    // ตรวจสอบค่าที่ได้มาจากฟอร์ม
+    console.log("companyType: ", companyType); // ตรวจสอบค่า dropdown
+    console.log("companyName: ", companyName); // ตรวจสอบค่า textbox
 
     // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
     if (!companyType || !companyName || !window.lineId) {
@@ -101,8 +105,11 @@ function submitForm() {
     questions.forEach(q => {
         const dropdownValue = q.querySelector("select").value;
         const textValue = q.querySelector("input").value;
-        
+
         // ตรวจสอบข้อมูลที่กรอกให้ครบถ้วน
+        console.log("dropdownValue: ", dropdownValue); // ตรวจสอบค่าของ dropdown
+        console.log("textValue: ", textValue); // ตรวจสอบค่าของ textbox
+
         if (!dropdownValue || !textValue) {
             alert("กรุณากรอกข้อมูลให้ครบทุกคำถาม");
             return;  // หยุดการส่งข้อมูลหากมีคำถามใดๆ ไม่ครบ
@@ -125,7 +132,7 @@ function submitForm() {
             displayName: window.displayName
         };
 
-        const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbw1Z7qIVNEOPbJCbzL7RB1bbzDCdL0ZM8F8be5dwPJ7g2SH322iWENttvC1L5sMJV1zGw/exec";
 
         fetch(scriptUrl, {
             method: 'POST',
