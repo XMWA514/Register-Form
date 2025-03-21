@@ -13,11 +13,11 @@
         }
         .question {
             margin-bottom: 15px;
-            display: flex;
+            display: flex; /* ใช้ flex เพื่อให้ dropdown และ textbox อยู่บรรทัดเดียวกัน */
             align-items: center;
         }
         .question label {
-            margin-right: 10px;
+            margin-right: 10px; /* เพิ่มระยะห่างระหว่าง label กับ dropdown */
         }
         .question select, .question input {
             padding: 8px;
@@ -26,13 +26,19 @@
         .question input {
             width: 100%;
         }
+        @media (max-width: 600px) {
+            .question select, .question input {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <h2>กรอกข้อมูลบริษัท</h2>
-    <div class="form-container" id="questionContainer">
+    <h2>การลงทะเบียนบริษัท</h2>
+    <div class="form-container">
         <!-- คำถามเริ่มต้น -->
         <div class="question">
+            <label for="companyType">กรอกข้อมูลบริษัท:</label>
             <select id="companyType">
                 <option value="บจก.">บจก.</option>
                 <option value="หจก.">หจก.</option>
@@ -41,12 +47,12 @@
         </div>
     </div>
 
-    <button onclick="addQuestion()">เพิ่มคำถาม</button>
-    <button onclick="submitForm()">ลงทะเบียน</button>
+    <button onclick="submitForm()">ส่งข้อมูล</button>
 
     <script>
+        // เริ่มต้น LIFF app
         window.onload = function() {
-            liff.init({ liffId: "2007078079-MzK8lPxY" }).then(() => {
+            liff.init({ liffId: "YOUR_LIFF_ID" }).then(() => {
                 console.log("LIFF Initialized!");
 
                 // ดึงข้อมูล Line ID และ Line Display Name ของผู้ใช้
@@ -61,95 +67,44 @@
             });
         };
 
-        // ฟังก์ชั่นเพิ่มคำถามใหม่
-        function addQuestion() {
-            const container = document.getElementById("questionContainer");
+        // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
+        function submitForm() {
+            const companyType = document.getElementById("companyType").value;
+            const companyName = document.getElementById("companyName").value;
 
-            const questionDiv = document.createElement("div");
-            questionDiv.classList.add("question");
+            // ตรวจสอบค่าที่ได้มาจากฟอร์ม
+            console.log("companyType: ", companyType); // ตรวจสอบค่า dropdown
+            console.log("companyName: ", companyName); // ตรวจสอบค่า textbox
 
-            const dropdown = document.createElement("select");
-            dropdown.innerHTML = `
-                <option value="บจก.">บจก.</option>
-                <option value="หจก.">หจก.</option>
-            `;
+            // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
+            if (!companyType || !companyName) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+                return;  // หยุดการส่งข้อมูลหากมีข้อมูลไม่ครบ
+            }
 
-            const textbox = document.createElement("input");
-            textbox.type = "text";
-            textbox.placeholder = "กรุณากรอกข้อมูล";
+            const formData = [{
+                dropdown: companyType,
+                text: companyName
+            }];
 
-            questionDiv.appendChild(dropdown);
-            questionDiv.appendChild(textbox);
-            container.appendChild(questionDiv);
+            // ส่งข้อมูล
+            const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
+
+            fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: formData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("ส่งข้อมูลสำเร็จ!");
+            })
+            .catch(error => {
+                alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
+            });
         }
-
-  // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
-function submitForm() {
-    const companyType = document.getElementById("companyType").value;
-    const companyName = document.getElementById("companyName").value;
-
-    // ตรวจสอบค่าที่ได้มาจากฟอร์ม
-    console.log("companyType: ", companyType); // ตรวจสอบค่า dropdown
-    console.log("companyName: ", companyName); // ตรวจสอบค่า textbox
-
-    // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
-    if (!companyType || !companyName || !window.lineId) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-        return;  // หยุดการส่งข้อมูลหากมีข้อมูลไม่ครบ
-    }
-
-    const questions = document.querySelectorAll(".question");
-    let formData = [];
-
-    // รวบรวมข้อมูลจากคำถามทั้งหมด
-    questions.forEach(q => {
-        const dropdownValue = q.querySelector("select").value;
-        const textValue = q.querySelector("input").value;
-
-        // ตรวจสอบข้อมูลที่กรอกให้ครบถ้วน
-        console.log("dropdownValue: ", dropdownValue); // ตรวจสอบค่าของ dropdown
-        console.log("textValue: ", textValue); // ตรวจสอบค่าของ textbox
-
-        if (!dropdownValue || !textValue) {
-            alert("กรุณากรอกข้อมูลให้ครบทุกคำถาม");
-            return;  // หยุดการส่งข้อมูลหากมีคำถามใดๆ ไม่ครบ
-        }
-
-        formData.push({ dropdown: dropdownValue, text: textValue });
-    });
-
-    // เพิ่มข้อมูลคำถามแรก (ประเภทบริษัทและชื่อบริษัท)
-    formData.unshift({
-        dropdown: companyType,
-        text: companyName
-    });
-
-    // ส่งข้อมูล
-    if (formData.length > 0 && window.lineId) {
-        const payload = {
-            data: formData,
-            lineId: window.lineId,
-            displayName: window.displayName
-        };
-
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbw1Z7qIVNEOPbJCbzL7RB1bbzDCdL0ZM8F8be5dwPJ7g2SH322iWENttvC1L5sMJV1zGw/exec";
-
-        fetch(scriptUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert("ส่งข้อมูลสำเร็จ!");
-        })
-        .catch(error => {
-            alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
-        });
-    }
-}
     </script>
 </body>
 </html>
