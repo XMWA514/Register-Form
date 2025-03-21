@@ -84,48 +84,65 @@
         }
 
         // ฟังก์ชั่นสำหรับการส่งข้อมูลฟอร์ม
-        function submitForm() {
-            const questions = document.querySelectorAll(".question");
-            let formData = [];
+function submitForm() {
+    const companyType = document.getElementById("companyType").value;
+    const companyName = document.getElementById("companyName").value;
 
-            questions.forEach(q => {
-                const dropdownValue = q.querySelector("select").value;
-                const textValue = q.querySelector("input").value;
-                formData.push({ dropdown: dropdownValue, text: textValue });
-            });
+    // ตรวจสอบให้แน่ใจว่าได้กรอกข้อมูลครบถ้วน
+    if (!companyType || !companyName || !window.lineId) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        return;  // หยุดการส่งข้อมูลหากมีข้อมูลไม่ครบ
+    }
 
-            formData.unshift({
-                dropdown: document.getElementById("companyType").value,
-                text: document.getElementById("companyName").value
-            });
+    const questions = document.querySelectorAll(".question");
+    let formData = [];
 
-            if (formData.length > 0 && window.lineId) {
-                const payload = {
-                    data: formData,
-                    lineId: window.lineId,
-                    displayName: window.displayName
-                };
-
-                const scriptUrl = "https://script.google.com/macros/s/AKfycbw1Z7qIVNEOPbJCbzL7RB1bbzDCdL0ZM8F8be5dwPJ7g2SH322iWENttvC1L5sMJV1zGw/exec";
-
-                fetch(scriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert("ส่งข้อมูลสำเร็จ!");
-                })
-                .catch(error => {
-                    alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
-                });
-            } else {
-                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            }
+    // รวบรวมข้อมูลจากคำถามทั้งหมด
+    questions.forEach(q => {
+        const dropdownValue = q.querySelector("select").value;
+        const textValue = q.querySelector("input").value;
+        
+        // ตรวจสอบข้อมูลที่กรอกให้ครบถ้วน
+        if (!dropdownValue || !textValue) {
+            alert("กรุณากรอกข้อมูลให้ครบทุกคำถาม");
+            return;  // หยุดการส่งข้อมูลหากมีคำถามใดๆ ไม่ครบ
         }
+
+        formData.push({ dropdown: dropdownValue, text: textValue });
+    });
+
+    // เพิ่มข้อมูลคำถามแรก (ประเภทบริษัทและชื่อบริษัท)
+    formData.unshift({
+        dropdown: companyType,
+        text: companyName
+    });
+
+    // ส่งข้อมูล
+    if (formData.length > 0 && window.lineId) {
+        const payload = {
+            data: formData,
+            lineId: window.lineId,
+            displayName: window.displayName
+        };
+
+        const scriptUrl = "YOUR_GOOGLE_APPS_SCRIPT_URL";
+
+        fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("ส่งข้อมูลสำเร็จ!");
+        })
+        .catch(error => {
+            alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + error);
+        });
+    }
+}
     </script>
 </body>
 </html>
